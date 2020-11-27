@@ -1,7 +1,7 @@
 # LifeSatisfaction
 Investigating the aspects of life that have the greatest impact on life satisfaction
 
-Most humans share an innate yearning to find satisfaction and happiness in their lives, and it is this yearning which led me to create this project. This project looks at the current happiness, annual income, and many other aspects of the lives of Somerville Residents to find out what has the greatest impact on life satisfaction. I use Multiple Linear Regression models and Ordinal Logistic Regression Model to find and analyze the aspects of life with the strongest relationships to life satisfaction. 
+Most humans share an innate yearning to find satisfaction and happiness in their lives, and it is this yearning which led me to create this project. This project looks at the current happiness, annual income, and many other aspects of the lives of Somerville Residents to find out what has the greatest impact on life satisfaction. I use Multiple Linear Regression and Ordinal Logistic Regression models to find and analyze the aspects of life with the strongest relationships to life satisfaction. 
 
 ## Table of Contents
 * [Installation](#Installation)
