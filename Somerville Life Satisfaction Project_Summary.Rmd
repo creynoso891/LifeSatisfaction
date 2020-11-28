@@ -306,6 +306,7 @@ print(lm_model)
 ```
 
 I used 10-Fold resampling cross validation to measure the accuracy with which the final linear model can predict the general happiness of Somerville Residents.  
+
 - **The Final Model has a 64% accuracy** in predicting life satisfaction when given: current level of happiness, satisfaction with Somerville, perceived similarity level, marital status, and annual income.  
 
 # Ordinal Life Satisfaction Variable
