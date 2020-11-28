@@ -1,0 +1,492 @@
+---
+title: "Somerville Life Satisfaction Project-Summary"
+author: "Citlally Reynoso"
+date: "11/20/2020"
+output: pdf_document
+---
+
+# About Somerville  
+Somerville is a city located in Massachusetts, United States. It is about three miles northwest of the city of Boston and has a population of 81,360 people.
+
+# Data  
+The residents of Somerville responded to a survey that asked about  the level of satisfaction they had towards their life in general. Additionally, a series of questions were asked about personal and environmental aspects of the individuals' lives.  
+Somerville Happiness Survey responses - 2011, 2013, 2015
+link:  https://catalog.data.gov/dataset/somerville-happiness-survey-responses-2011-2013-2015  
+
+# Objective  
+My goal is to investigate the questions asked to the residents of Somerville in order to identify the aspects of life with the strongest relationship to happiness. Happiness is a state which is rather challenging to quantify and attribute, so I do not intend to find the source of happiness. However, I am excited to learn more about what the happy people of Somerville have in common. I am thrilled to see what interesting connections I will discover in this happiness survey. 
+
+```{r, echo=FALSE, results='hide'}
+# Set Working directory 
+setwd("~/Personal Stats Projects")
+# read in data set 
+happy <- read.csv("./Somerville_Happiness_Survey_responses_-_2011__2013__2015.csv")
+#check data to make sure it's formatted correctly 
+#summary(happy)
+head(happy)
+```
+
+# Data Cleaning 
+
+1. There are observations from the years 2011-2015 in this dataset, but this range in years may result in analytical issues.
+  - An example may be: issues interpreting the effect of income due to inflation
+  - remove columns with measurements exclusively for years **after** 2011
+
+```{r, echo=FALSE, results='hide', message=FALSE}
+library(dplyr)
+happy2011 <- happy %>% filter(Year == 2011)
+
+# remove columns with measurements exclusively for years after 2011
+# ex. How.proud.are.you.to.be.a.Somerville.resident._2015
+# method: any columns that are comletely emply will be deleted  
+happy2011 <- happy2011[,!apply(happy2011, 2, function(x)sum(is.na(x)) ) == 6167]
+# delete year variable since all the data is from 2011
+happy2011 <- happy2011[,-2]
+#summary(happy2011)
+```
+
+2. Answers should range from 1-10 or from 1-5. 
+  - responses outside of the appropriate range will be identified and replaced with NA. 
+```{r, echo=FALSE, results='hide'}
+# identify what the appropriate scale is for each question.
+lapply(happy2011[-1], function(x)table(x))
+
+# columns with range 1-10: 2,3,4,5,6,9
+# replace observations outside of range with NA 
+```
+
+```{r, echo=FALSE, results='hide'}
+index <- c(2,3,4,5,6,9)
+for(i in 1:length(index)){
+     #print(happy2011[which(happy2011[,index[i]] > 10 | happy2011[,index[i]]< 1) , index[i]])
+     happy2011[which(happy2011[,index[i]] > 10 | happy2011[,index[i]] < 1), index[i]] <- NA
+   }
+
+# columns with range 1-5: 7,8,10
+# replace observations outside of range with NA 
+index <- c(7,8,10)
+for(i in 1:length(index)){
+ # print(happy2011[which(happy2011[,index[i]] > 5 | happy2011[,index[i]]< 1) , index[i]])
+  happy2011[which(happy2011[,index[i]] > 5 | happy2011[,index[i]] < 1), index[i]] <- NA
+}
+```
+
+3. Our question will revolve around how happy you are with your life as a whole. Therefore, any rows missing data for the following question will be omitted. : How satisfied are you with your life in general?
+```{r, echo=FALSE, results='hide'}
+happy2011 <- happy2011 %>% filter( is.na(How.satisfied.are.you.with.your.life.in.general.) ==FALSE  )
+```
+
+4. Change Column names to facilitate the process of subsetting the data set 
+
+```{r, echo = FALSE}
+#shorten the column names
+#text_tbl is a data frame with the full questions and the names of the columns they correlate to 
+text_tbl <- data.frame(
+Survey_Questions = c(
+"1. How happy do you feel right now?",        
+"2. How satisfied are you with your life in general?",                                            
+"3. How satisfied are you with Somerville as a place to live?",                                    
+"4. In general  how similar are you to other people you know?",              
+"5. When making decisions  are you more likely to seek advice or decide for yourself?",        
+"6. The availability of affordable housing?",           
+"7. How would you rate the following  The overall quality of public schools in your community?", 
+"8. How would you rate the following  The beauty or physical setting?",                 
+"9. How would you rate the following  The effectiveness of the local police?",              
+"10. What is your gender?",                                                                    
+"11. Age?",                                                                             
+"12. Marital status?",                                                                         
+"13. What is your race?",                                                               
+"14. How long have you lived here?",                                                                
+"15. What is your annual household income?"),
+Column_Name = c(
+"happy_now",
+"satisfied_life",
+"satisfied_somerville",
+"similar",
+"decisions",
+"affordable_housing",
+"public_schools",
+"setting_beauty",
+"local_police",
+"gender",
+"age",
+"marital_status",
+"race",
+"years_here",
+"annual_income"
+)
+)
+
+#change column names 
+names(happy2011)[-1] <- as.character(text_tbl$Column_Name)
+```
+
+5. Drop levels not used in factor variables
+```{r, echo=FALSE}
+happy2011$annual_income <- factor(happy2011$annual_income)
+```
+
+```{r, echo = FALSE, message=FALSE} 
+#table to visualize column name changes 
+library(kableExtra)
+library(knitr)
+kable(text_tbl,"latex", booktabs = T, caption = "Survey Questions and their New, Corresponding Column Names") %>% 
+kable_styling(latex_options = "striped")
+```
+  
+
+# Exploratory Data Analysis & Data Visualization  
+
+```{r, echo = FALSE, message = FALSE, fig.align="center", warning = FALSE}
+library(ggplot2)
+#histogram to visualize the happiness distribution in somerville
+qplot(happy2011$satisfied_life, geom = "histogram", binwidth = 0.5,
+      main = "Satisfaction with Life in General", 
+      xlab = "How satisfied are you with your life in general?",
+      ylab = "Count", 
+      fill = I("light blue")
+   ) + scale_x_continuous(breaks = seq(from = 1, to = 10, by = 0.5)) +
+  theme_bw()
+```
+
+
+```{r, echo = FALSE, message=FALSE, warning=FALSE}
+# graphs variables across overall happiness to get a feel for relationships 
+library(gridExtra)
+library(stringr)
+
+lables <- scale_x_discrete(labels = function(x) str_wrap(x, width = 10))
+
+p <- ggplot(data = happy2011, aes(y = satisfied_life)) + 
+  geom_boxplot(size = .75) +
+  geom_jitter(alpha = .5, aes(color = satisfied_life)) +
+  ylab("How satisfied are you with your life in general?") + 
+  theme(legend.position='none') + stat_summary(fun.y=median, colour=I("dark blue"), geom="line", aes(group = 1))
+
+titles <- c("Current Happiness","Satisfaction with Somerville","Similarity to other People","Advise Seeking", "Affordable Housing Availability","Quality of Public Schools","Beauty of Physical Setting","Effectiveness of Local Police","Gender","Age","Marital Status","Race","Years Lived at Somerville","Annual Household Income")
+```  
+
+```{r, echo=FALSE, eval=FALSE}
+#this code creates the graphs for all the variables, but will not be displayed in the final html/pdf because there are too many graphs. Chose the ones that are most meaningful to the paper
+for(i in 4:16){
+print(p + 
+         aes(x = factor(happy2011[,i])) + 
+         xlab(paste0(text_tbl$Survey_Questions[i-1])) +
+         scale_x_discrete(labels = function(x) str_wrap(x, width = 10)) +
+         labs(title  = paste0("Life Satisfaction vs. ",
+                              titles[i-2]))
+)
+}
+p + aes(x = factor(happy2011[,2])) + 
+         xlab(paste0(text_tbl$Survey_Questions[1])) +
+         scale_x_discrete(labels = function(x) str_wrap(x, width = 10)) +
+         labs(title  = paste0("Life Satisfaction vs. ",
+                              titles[1]))
+```
+
+```{r, echo=FALSE, warning = FALSE}
+#1 happy_now 
+p + aes(x = factor(happy2011[,2])) + 
+         xlab(paste0(text_tbl$Survey_Questions[1])) +
+         scale_x_discrete(labels = function(x) str_wrap(x, width = 10)) +
+         labs(title  = paste0("Life Satisfaction vs. ",
+                              titles[1]))
+```
+
+How happy do you feel right now?  
+The boxplot graph above clearly showcases a strong relationship between general happiness and current happiness. As the current happiness of the individual rises, their general happiness increases as well. This is the most promising predictor.  
+
+```{r, echo=FALSE, warning = FALSE}
+#2 satisfied_somerville
+p + 
+         aes(x = factor(happy2011[,4])) + 
+         xlab(paste0(text_tbl$Survey_Questions[4-1])) +
+         scale_x_discrete(labels = function(x) str_wrap(x, width = 10)) +
+         labs(title  = paste0("Life Satisfaction vs. ",
+                              titles[4-2]))
+```
+How satisfied are you with Somerville as a place to live?  
+The graph above illustrates a positive relationship between satisfaction with Somerville and life satisfaction. There is evidence to suggest that as your satisfaction with Somerville goes up, your life satisfaction goes up. Even though this graph does not show a perfectly positive relationship, this variable will most likely be a significant predictor.   
+
+
+```{r, echo=FALSE, warning = FALSE}
+#3 similar
+p + 
+         aes(x = factor(happy2011[,5])) + 
+         xlab(paste0(text_tbl$Survey_Questions[5-1])) +
+         scale_x_discrete(labels = function(x) str_wrap(x, width = 10)) +
+         labs(title  = paste0("Life Satisfaction vs. ",
+                              titles[5-2]))
+```
+In general, how similar are you to other people you know?  
+Showcased above is another positive trend. The more similar you are to the people around you, the happier you tend to be in your overall life. There is a sharp rise at 4.5 that does not seem to follow with the trend. However, this is but a single observation. We see another single observation at 9.5 that really changes the path of the trend, but this is only one observation. When modeling the data, this single point will not hold as much weight as is illustrated above. 
+
+```{r, echo=FALSE, warning = FALSE}
+#4 local_police
+p + 
+         aes(x = factor(happy2011[,10])) + 
+         xlab(paste0(text_tbl$Survey_Questions[10-1])) +
+         scale_x_discrete(labels = function(x) str_wrap(x, width = 10)) +
+         labs(title  = paste0("Life Satisfaction vs. ",
+                              titles[10-2]))
+
+```
+How would you rate the following: The effectiveness of the local police?  
+This variable is interesting because it seems to have a positive relationship with life satisfaction but it is far from strong or clear. It is important to point out that 766 people failed to answer this question, and including this variable in the analysis would cause too many observations to be lost.  
+
+- Tip: if you have a variable with a small set of levels and many NAs, analyzing it as a categorical predictor might be a wonderful opportunity. You can use NA as a category and this saves those observations from being lost in the analysis. If the NAs stand out compared to the rest of the boxplots, then looking into a relationship can prove fruitful. 
+
+- However, in this case, the NAs do not stand out and seem to spread out through all the ratings of life satisfaction There is no indication that people who fail to answer are more or less happy in life. The categorical transformation of the local_police variable will not help to explain the variation in life satisfaction.
+
+# Linear Regression Model   
+
+This model is a wonderful place to start because it provides results that are very easy to interpret. The goal of this paper is to explore and find the variables which have the greatest effect on the life satisfaction experienced by the residents of Somerville. Consequently, it is very helpful to create a model with comprehensible results that can appeal to people with various levels of statistical literacy. 
+
+Final Linear Regression Model  
+**Output:**  
+Satisfied life: How satisfied you are with your life in general on a scale of 1-10. Where 1 is the least amount of satisfaction and ten is the largest amount of satisfaction.  
+**Predictors:**  
+
+1. happy now
+2. satisfied Somerville
+3. similar
+4. marital status
+5. annual income  
+ 
+**Summary of the Model** 
+```{r, echo=FALSE}
+m2 <- lm(satisfied_life ~ happy_now + satisfied_somerville + similar + marital_status +annual_income,
+         data = happy2011)
+summary(m2)
+```
+
+**Coefficient and Model Analysis**  
+
+*Using the predictors enumerated below, the final model is able to explain 64.46% of the variation in the life satisfaction variable.* Before moving on to cross-validating this model, I will analyze what some of the model coefficients are telling us:  
+
+1. **Happy now:** For every one-point increase in the level of current happiness, there is, on average, a  0.698868 increment in general life satsifaction.
+- The current level of happiness of the participants is, by far, the strongest predictor of their general life satisfaction 
+
+2. **Satisfied Somerville:** A one-point increment in the participants' satisfaction with Somerville resulted in an average increment of 0.048572 in their life satisfaction.
+
+3. **Similar:** For every point increase in similarity, there is a 0.115 increase in general life satisfaction.
+- For the residents of Somerville, feeling more similar to the people around correlates to a higher level of life satisfaction.
+
+4. **Marital status:** Below is an ordered list of marital status based on levels of life satisfaction. Single/never married people being the least satisfied and widowed people experiencing the greatest satisfaction:  
+single/never married < Divorced < Married < Refused Response < Widowed
+- This is an interesting categorical variable which allows us to investigate how marital status affects the life satisfaction of the people of Somerville. The least happy people are those that are single and have never been married. These people experience a decrease in life satisfaction of 0.01 point compared to those who are divorced. Next we have people who have been divorced. Those who are married come in at an average increment of 0.13 in life satisfaction compared to the divorced group. Those who are widowed or refused to answer the question are 0.2 points more satisfied with their life than those who have been divorced. 
+
+
+5. *Annual income:* is categorized in 10,000 dollar increments. The lowest category is less than $10,000 and the highest is $100,000 or more.
+- Those who earn between $10,000 and $20,000 seem to be the most unhappy members of the Somerville community. They are even more unhappy than the group who earn less than $10,000.
+- People who earn between $20,000-$50,000 tend to be 0.1-0.2 points happier than those who earn less that between $10,000 and $20,000 annually.
+- People who earn $50,000-$100,000 or more tend to be 0.25-0.4 point happier than those who earn between $10,000 and $20,000 annually
+  
+
+# Cross Validation 
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+library(MASS)
+library(caret)
+#set the seed to allow for replication
+set.seed(9783)
+# Define training control
+traincnt <- trainControl(method = "cv", number = 10)
+# Create a clean data set with only the varibles used in the final linear model
+train_data <- na.omit(happy2011[,c("satisfied_life", "happy_now", 
+                                   "satisfied_somerville","similar", "marital_status",
+                                   "annual_income")])
+# Train the model
+lm_model <- train(satisfied_life ~  happy_now + satisfied_somerville + 
+                 similar + marital_status + annual_income, 
+               data = train_data, method = "lm",
+               trControl = traincnt)
+print(lm_model)
+
+```
+
+I used 10-Fold resampling cross validation to measure the accuracy with which the final linear model can predict the general happiness of Somerville Residents.  
+- **The Final Model has a 64% accuracy** in predicting life satisfaction when given: current level of happiness, satisfaction with Somerville, perceived similarity level, marital status, and annual income.  
+
+# Ordinal Life Satisfaction Variable
+
+I created a new ordinal variable called life_satisfaction that classifies the general life satisfaction of the subjects based on the following scale:  
+
+- 1-2.5: extremely unsatisfied
+- 3-4.5: unsatisfied 
+- 5-6.5: somewhat satisfied 
+- 7-8.5: satisfied 
+- 9-10: very satisfied 
+
+**Table of life_satisfaction Category Counts** 
+```{r,echo=FALSE}
+life_satisfaction <- as.numeric(length(happy2011$satisfied_life))
+#assign levels of life satisfaction
+life_satisfaction[happy2011$satisfied_life < 3] <- "extremely unsatisfied"
+life_satisfaction[happy2011$satisfied_life >= 3 & happy2011$satisfied_life < 5] <- "unsatisfied"
+life_satisfaction[happy2011$satisfied_life >= 5 & happy2011$satisfied_life < 7] <- "somewhat satisfied"
+life_satisfaction[happy2011$satisfied_life >= 7 & happy2011$satisfied_life < 9] <- "satisfied"
+life_satisfaction[happy2011$satisfied_life >= 9] <- "very satisfied"
+
+life_satisfaction <- factor(life_satisfaction, ordered = TRUE, levels = c("extremely unsatisfied", "unsatisfied", "somewhat satisfied","satisfied", "very satisfied"))
+
+happy2011$life_satisfaction <- life_satisfaction
+table(happy2011$life_satisfaction)
+```
+
+# Exploratory Data Anlysis for Ordered Categorical Variable 
+```{r, echo=FALSE}
+p_cat <- ggplot(data = happy2011, aes(x = life_satisfaction)) + 
+  geom_boxplot(size = 1) +
+  geom_jitter(alpha = .9, aes(color = life_satisfaction)) +
+  xlab("How satisfied are you with your life in general?") + 
+  theme(legend.position='none') + scale_color_brewer(palette="YlGnBu")
+```
+
+
+```{r, echo=FALSE, eval=FALSE}
+for(i in 4:16){
+  print(p_cat +
+  aes(y = happy2011[,i]) + 
+  ylab(paste0(text_tbl$Survey_Questions[i-1])) +
+  labs(title  = paste0("Life Satisfaction vs. ",
+                       titles[i-2])))
+}
+```
+
+*For your convenience, only the most important graphs have been included in this pdf*  
+
+```{r, echo=FALSE, warning = FALSE}
+#1 happy_now 
+p_cat + 
+  aes(y = happy2011[,2]) + 
+         ylab(paste0(text_tbl$Survey_Questions[1])) +
+         labs(title  = paste0("Life Satisfaction vs. ",
+                              titles[1]))
+```
+
+- Current happiness and life satisfaction share a strong positive relationship. Those who are currently happy tend to express higher levels of life satisfaction.  
+
+```{r, echo=FALSE, warning = FALSE}
+#2 satisfied_somerville
+p_cat + 
+        aes(y = happy2011[,4]) + 
+         ylab(paste0(text_tbl$Survey_Questions[4-1])) +
+         labs(title  = paste0("Life Satisfaction vs. ",
+                              titles[4-2]))
+```
+
+- Somerville residents who are happier with the city seem to experience higher levels of life satisfaction. The variation of how satisfied residents are with Somerville increases as general life satisfaction decreases. On the other hand, residents who are very satisfied with their life seem to generally rate their satisfaction with Somerville highly.  
+
+```{r, echo=FALSE, warning = FALSE}
+#3 similar
+p_cat + 
+         aes(y = happy2011[,5]) + 
+         ylab(paste0(text_tbl$Survey_Questions[5-1])) +
+         labs(title  = paste0("Life Satisfaction vs. ",
+                              titles[5-2]))
+```
+
+- People who feel that others are similar to them, tend to experience higher levels of life satisfaction. The group of people who are extremely unsatisfied with their life tend to have a large variation in how similar they feel to others, and they center around a level 4.4 out of 10. The higher the life satisfaction, the less variation we see in levels of perceived similarity. Those who are very satisfied with life average at a perceived similarity level of 7.5 out of 10.
+
+
+
+# Ordinal Logistic Regression Model
+
+Final Linear Regression Model  
+**Output:**  
+Life Satisfaction: How satisfied you are with your life in general: extremely unsatisfied, unsatisfied, somewhat satisfied, satisfied, or very satisfied  
+**Predictors:**  
+
+1. happy now
+2. satisfied Somerville
+3. similar
+
+
+```{r, echo= FALSE, message=FALSE, results='hide'}
+library(MASS)
+#dropped all the variables which turned out not to be significant 
+olr_1 <- polr(life_satisfaction ~ happy_now + satisfied_somerville + similar,
+              data = happy2011, Hess=TRUE)
+summary(olr_1)
+```
+
+**Table of Variable Significance**  
+```{r, echo = FALSE}
+ctable_1 <- coef(summary(olr_1))
+#calculate the significance of the coefficients 
+pval_1 <- pnorm(abs(ctable_1[, "t value"]), lower.tail = FALSE) * 2
+#join coefficeints and significance values 
+ctable_1 <- as.data.frame(cbind(ctable_1, "p value" = pval_1))
+ctable_1[,c(1,4)]
+```
+The variables fitted in the final ordinal logistic model are all listed in the table above.  
+
+- All the chosen predictors have a p-value smaller than the established 0.05 threshold, hence all the variables are significant predictors that help us explain the variation in the life satisfaction of Somerville residents.
+- Additionally, each category of happiness is significantly different from the others. The data shows evidence to suggest that there is a difference in the lives of those who belong to different categories of life satisfaction.
+- The log-odds coefficients for the model have also been provided. Because this is a logistic model, an exponential transformation is necessary to interpret the coefficients in the point system they were originally in.  
+
+**Coefficients and their Confidence Intervals**  
+```{r, echo = FALSE}
+ci <- confint(olr_1)
+exp(cbind(t(t(coef(olr_1))),ci))
+
+```
+
+1. **Happy Now**: For every one-point increase in the level of current happiness, there is an average increase of 3.326 in general life satisfaction.
+- Current happiness has the strongest, positive relationship with life satisfaction. Those who are currently happy highly rate their life satisfaction, and those who are sad tend to poorly rate their life satisfaction. 
+2. **Satisfied Somerville**: When there is a one-point increase in the level of satisfaction with Somerville, general life satisfaction increases by 1.089 points.
+- Individuals who are more satisfied with Somerville tend to be more satisfied with life. 
+3. **Similar**: People who view those around them as more similar to them, generally live a more satisfied life. For a one-point increase in perceived similarity, there is a 1.188 increase in life satisfaction.
+- For the residents of Somerville, feeling more similar to the people around them correlates to experiencing a more satisfying life.
+
+# Cross Validation   
+
+```{r,echo=FALSE}
+#training model olr_2 (no local_police)
+# Define training control
+set.seed(8579) 
+traincnt <- trainControl(method = "cv", number = 10)
+
+# Train the model
+train_data <- na.omit(happy2011[,c("life_satisfaction", "happy_now", 
+                                   "satisfied_somerville","similar")])
+
+model_2 <- train(life_satisfaction ~ happy_now +  satisfied_somerville + similar, 
+               data = train_data, method = "polr",
+               trControl = traincnt)
+# Summarize the results
+print(model_2)
+
+```
+Using 10-fold resampling cross validation, **the ordinal logistic regression (olr) model has shown to have a 71% accuracy rate.** This model can accurately predict the life satisfaction category a person falls under 71% of the time. It can accomplish this using only three predictors: current level of happiness, satisfaction with Somerville, and similarity to others.  
+- This model has outperformed the linear model which included two additional predictors: annual_income and marital status
+
+
+
+# Insights and Conclusions  
+*The conclusions reached in this paper extend only to the residents of Somerville. Any recommendations made are based on reasoning but are not backed by statistical evidence given that the residents of Somerville are not representative of the general population. Please take these recommendations at your own risk and with a grain of salt.*  
+
+1. Current happiness affects how satisfied Somerville residents are with their life.
+- This comes as no surprise, considering that general life satisfaction is but an extension of momentary happiness. However, it is interesting to question to what extent our current state of happiness may affect our perception of life satisfaction. 
+
+2. The people of Somerville are more satisfied with their life when they are satisfied with the place where they live.
+- Although this conclusion cannot be extrapolated to everyone else in the world because Somerville is not a representative sample, there is something intuitive about the conclusion. 
+- Next time you are looking to improve your life, maybe you can move to a place which you are highly satisfied with!
+- If this is not a feasible option, then you can redecorate your house or room. This satisfaction could permeate to your state of happiness.
+
+3. The people of Somerville are happier when they deem that those around them are similar to them.
+- Oddly enough, this question does not specify whether people are similar in terms of ethnicity, socioeconomic background, or general interests. Therefore, I presume that the question is open to interpretation. Responses might simply translate to how much people feel like they fit in with the members of their community.
+-  Maybe they share your cultural background, interests, or simply your sense of humor. If you are looking to improve your life then finding a group of people that you feel similar to is a good start!  
+
+# Study Limitations and Further Questions
+
+**Limitations:**  
+
+1. The data had some promising variables, such as effectiveness of local police, that I was not able to use due to missingness. These variables were potentially important and could have told us more about what affects the life satisfaction of the residents of Somerville, but they had to be dropped.
+2. The residents of Somerville are not representative of the general population of the United States. Somerville, Massachusetts is no representative in terms of racial composition, socioeconomic background, and many other important characteristics. This limits the implications of our findings to only the people of Somerville. 
+
+**Further Questions**
+
+1. How would a sample representative of the population of the United States respond to the questions asked in this study?
+2. Is there a way to garner a higher response rate for the questions that seemed potentially important but that resulted in a lot of NAs? Could we redesign the questions or response type to make the questions more welcoming to a response?
