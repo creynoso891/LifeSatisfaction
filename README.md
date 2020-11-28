@@ -18,16 +18,16 @@ To get started you will need a recent version of RStudio. Additionally, the pack
         install.packages(c("dplyr", "kableExtra", "knitr", 
                             "ggplot2", "stringr", "MASS", "caret"))
                             
-## About Somerville 
+## About Somerville <a name="About"></a>
 Somerville is a city located in Massachusetts, United States. It is about three miles northwest of the city of Boston and has a population of 81,360 people. The residents of Somerville responded to a survey that asked about  the level of satisfaction they had towards their life in general. Additionally, a series of questions were asked about personal and environmental aspects of the individuals' lives.  
 [Somerville Happiness Survey responses - 2011, 2013, 2015](https://catalog.data.gov/dataset/somerville-happiness-survey-responses-2011-2013-2015)  
 
-## Project Motivation
+## Project Motivation <a name="motivation"></a>
 My goal is to investigate the questions asked to the residents of Somerville in order to identify the aspects of life with the strongest relationship to happiness. Happiness is a state which is rather challenging to quantify and attribute, so I do not intend to find the source of happiness. However, I am excited to learn more about what the happy people of Somerville have in common. I am thrilled to see what interesting connections I will discover in this happiness survey.
 
-## File Description
+## File Description <a name="description"></a>
 
-## Results and Insights
+## Results and Insights <a name="Results"></a>
 *The conclusions reached in this paper extend only to the residents of Somerville. Any recommendations made are based on reasoning but are not backed by statistical evidence given that the residents of Somerville are not representative of the general population. Please take these recommendations at your own risk and with a grain of salt.*  
 
 1. Current happiness affects how satisfied Somerville residents are with their life.
@@ -42,7 +42,7 @@ My goal is to investigate the questions asked to the residents of Somerville in 
 - Oddly enough, this question does not specify whether people are similar in terms of ethnicity, socioeconomic background, or general interests. Therefore, I presume that the question is open to interpretation. Responses might simply translate to how much people feel like they fit in with the members of their community.
 -  Maybe they share your cultural background, interests, or simply your sense of humor. If you are looking to improve your life then finding a group of people that you feel similar to is a good start!
 
-## Limitations and Further Questions
+## Limitations and Further Questions <a name="Limitations"></a>
 **Limitations**  
 1. The data had some promising variables, such as effectiveness of local police, that I was not able to use due to missingness. These variables were potentially important and could have told us more about what affects the life satisfaction of the residents of Somerville, but they had to be dropped.
 2. The residents of Somerville are not representative of the general population of the United States. Somerville, Massachusetts is no representative in terms of racial composition, socioeconomic background, and many other important characteristics. This limits the implications of our findings to only the people of Somerville. 
@@ -51,4 +51,4 @@ My goal is to investigate the questions asked to the residents of Somerville in 
 1. How would a sample representative of the population of the United States respond to the questions asked in this study?
 2. Is there a way to garner a higher response rate for the questions that seemed potentially important but that resulted in a lot of NAs? Could we redesign the questions or response type to make the questions more welcoming to a response?
 
-## Licensing, Authors, Acknowledgements
+## Licensing, Authors, Acknowledgements <a name="licensing"></a>
