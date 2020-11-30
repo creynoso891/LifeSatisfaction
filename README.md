@@ -26,7 +26,10 @@ Somerville is a city located in Massachusetts, United States. It is about three 
 My goal is to investigate the questions asked to the residents of Somerville in order to identify the aspects of life with the strongest relationship to happiness. Happiness is a state which is rather challenging to quantify and attribute, so I do not intend to find the source of happiness. However, I am excited to learn more about what the happy people of Somerville have in common. I am thrilled to see what interesting connections I will discover in this happiness survey.
 
 ## File Description <a name="description"></a>
-This project includes one csv file with all the necessary data, an R Markdown with all the code to clean and analyze the data, and the pdf produced using the R Markdown. 
+This project includes:
+1. one csv file with all the necessary data
+2. R Markdown with all the code to clean and analyze the data titled Somerville-Life-Satisfaction-Project_Summary.Rmd
+3. the pdf produced using the R Markdown titled Somerville-Life-Satisfaction-Project_Summary.pdf 
 
 ## Results and Insights <a name="Results"></a>
 *The conclusions reached in this paper extend only to the residents of Somerville. Any recommendations made are based on reasoning but are not backed by statistical evidence given that the residents of Somerville are not representative of the general population. Please take these recommendations at your own risk and with a grain of salt.*  
